@@ -27,22 +27,25 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
-    
+
 class UserLoginSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField()
-    password = serializers.CharField(style={
-        'input_type': 'password'
-    })
+    username = serializers.CharField()
+    password = serializers.CharField(style={'input_type': 'password'})
+
+    class Meta:
+        model = User
+        fields = ['username', 'password']  
 
     def validate(self, attrs):
-        email = attrs.get('email')
+        username = attrs.get('username')
         password = attrs.get('password')
 
         try:
-            user = user.objects.get(email=email)
+            user = User.objects.get(username=username)  
         except User.DoesNotExist:
-            raise serializers.ValidationError('invalid email or password')
+            raise serializers.ValidationError('Invalid username or password.')
+
         if not user.check_password(password):
-            raise serializers.ValidationError('invalid email or password')
-        
+            raise serializers.ValidationError('Invalid username or password.')
+
         return attrs
