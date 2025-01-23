@@ -9,7 +9,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email', 'password','password2']
-        extra_kwags = {
+        extra_kwargs = {
             'password': {'write_only': True}
         }
 
@@ -27,3 +27,22 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
+    
+class UserLoginSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(style={
+        'input_type': 'password'
+    })
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        try:
+            user = user.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError('invalid email or password')
+        if not user.check_password(password):
+            raise serializers.ValidationError('invalid email or password')
+        
+        return attrs
